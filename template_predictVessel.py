@@ -44,7 +44,20 @@ def evaluate():
 
 
 def predictor(csv_path):
-    # fill your code here
+    from sklearn.cluster import DBSCAN
+    from sklearn.cluster import AgglomerativeClustering
+    # load data and convert hh:mm:ss to seconds
+    df = pd.read_csv(csv_path, converters={'SEQUENCE_DTTM' : hh_mm_ss2seconds})
+    # select features 
+    selected_features = ['SEQUENCE_DTTM', 'LAT', 'LON', 'SPEED_OVER_GROUND' ,'COURSE_OVER_GROUND']
+    X = df[selected_features].to_numpy()
+    # Standardization 
+    X = preprocessing.StandardScaler().fit(X).transform(X)
+    # Detect the n_clusters parameter using DBSCAN
+    detect_n = DBSCAN(eps=0.7,min_samples=4).fit(X)
+    n = len(np.unique(detect_n.labels_))
+    # Fit Agglomerative clustering based on n
+    labels_pred = AgglomerativeClustering(n_clusters=n, linkage = 'ward').fit_predict(X)
     return labels_pred
 
 
